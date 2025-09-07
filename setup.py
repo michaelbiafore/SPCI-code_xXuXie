@@ -1,4 +1,4 @@
-from setuptools import setup, find_packages
+from setuptools import setup
 
 # Read requirements from requirements.txt
 with open('requirements.txt', 'r') as f:
@@ -18,7 +18,21 @@ setup(
     description="Sequential Prediction Conformal Inference Package",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    packages=find_packages(),
+    
+    # Explicitly specify the package structure
+    packages=['spci'],
+    package_dir={'spci': '.'},
+    
+    # Include all Python modules in the root directory
+    py_modules=[
+        'PI_class_EnbPI',
+        'SPCI_class', 
+        'data',
+        'utils_SPCI',
+        'utils_EnbPI',
+        'visualize'
+    ],
+    
     python_requires=">=3.7",
     install_requires=requirements,
     classifiers=[
