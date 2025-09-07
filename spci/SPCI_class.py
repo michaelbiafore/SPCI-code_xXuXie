@@ -14,7 +14,18 @@ from sklearn.linear_model import LinearRegression
 import pdb
 from . import data
 import torch.nn as nn
-from sklearn_quantile import RandomForestQuantileRegressor, SampleRandomForestQuantileRegressor
+
+# Handle sklearn_quantile import conditionally
+try:
+    from sklearn_quantile import RandomForestQuantileRegressor, SampleRandomForestQuantileRegressor
+    HAS_SKLEARN_QUANTILE = True
+except ImportError:
+    # Fallback to regular RandomForestRegressor if sklearn_quantile not available
+    RandomForestQuantileRegressor = RandomForestRegressor
+    SampleRandomForestQuantileRegressor = RandomForestRegressor
+    HAS_SKLEARN_QUANTILE = False
+    print("Warning: sklearn_quantile not available, using standard RandomForestRegressor")
+
 from numpy.lib.stride_tricks import sliding_window_view
 # from neuralprophet import NeuralProphet
 from skranger.ensemble import RangerForestRegressor

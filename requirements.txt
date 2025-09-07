@@ -1,6 +1,6 @@
 numpy>=1.21,<2.0
 statsmodels
-sklearn_quantile
+# sklearn_quantile  # Optional - causes numpy 2.0 conflicts
 skranger
 pandas
 scikit-learn
