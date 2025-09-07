@@ -1,17 +1,17 @@
-import utils_SPCI as utils
+from . import utils_SPCI as utils
 import calendar
 import matplotlib.pyplot as plt
 import seaborn as sns
 from statsmodels.tsa.stattools import pacf
 import numpy as np
-import data
+from . import data
 import pandas as pd
 import warnings
 import torch
 import pickle
 import pdb
 from sklearn.ensemble import RandomForestRegressor
-import SPCI_class as SPCI
+from . import SPCI_class as SPCI
 warnings.filterwarnings("ignore")
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 titlesize = 22

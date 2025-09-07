@@ -4,7 +4,7 @@ import numpy as np
 import warnings
 import torch
 import pickle
-import utils_EnbPI
+from . import utils_EnbPI
 import matplotlib.pyplot as plt
 from sklearn.preprocessing import OneHotEncoder
 import os
