@@ -108,6 +108,39 @@ def test_import_with_path():
     
     return False
 
+def test_numpy_compatibility():
+    """Test for numpy compatibility issues"""
+    print("\n" + "="*50)
+    print("TESTING NUMPY COMPATIBILITY")
+    print("="*50)
+    
+    try:
+        import numpy as np
+        print(f"✅ NumPy version: {np.__version__}")
+        
+        # Test problematic packages individually
+        problematic_packages = [
+            'skranger',
+            'sklearn_quantile', 
+            'statsmodels'
+        ]
+        
+        for pkg in problematic_packages:
+            try:
+                __import__(pkg)
+                print(f"✅ {pkg}: OK")
+            except Exception as e:
+                if "numpy.dtype size changed" in str(e):
+                    print(f"❌ {pkg}: NUMPY COMPATIBILITY ISSUE")
+                    print(f"   Error: {e}")
+                else:
+                    print(f"⚠️  {pkg}: {e}")
+                    
+    except Exception as e:
+        print(f"❌ NumPy import failed: {e}")
+    
+    return False
+
 def main():
     """Run all diagnostic tests"""
     print("="*60)
@@ -115,6 +148,7 @@ def main():
     print("="*60)
     
     test_python_path()
+    test_numpy_compatibility()
     success = test_direct_import()
     
     if not success:
@@ -126,13 +160,18 @@ def main():
     
     if not success:
         print("\n🔧 SUGGESTED FIXES:")
-        print("1. Reinstall the package:")
+        print("1. For numpy compatibility issues:")
+        print("   pip uninstall skranger sklearn_quantile -y")
+        print("   pip install --no-cache-dir --force-reinstall skranger sklearn_quantile")
+        print("\n2. Alternative - downgrade numpy:")
+        print("   pip install 'numpy<2.0'")
+        print("\n3. Reinstall the package:")
         print("   pip uninstall spci -y")
         print("   pip install git+https://github.com/michaelbiafore/SPCI-code_xXuXie.git")
-        print("\n2. Or install from local directory:")
+        print("\n4. Or install from local directory:")
         print("   pip uninstall spci -y") 
         print('   pip install "A:\\Packages\\SPCI\\SPCI-code_xXuXie"')
-        print("\n3. Check for dependency issues in the package modules")
+        print("\n5. Check for dependency issues in the package modules")
 
 if __name__ == "__main__":
     main()
