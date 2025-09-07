@@ -1,3 +1,8 @@
 statsmodels
 sklearn_quantile
 skranger
+pandas
+numpy
+scikit-learn
+matplotlib
+torch
