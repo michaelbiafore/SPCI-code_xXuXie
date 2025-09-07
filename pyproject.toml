@@ -10,14 +10,14 @@ authors = [{name = "SPCI Contributors"}]
 readme = "README.md"
 requires-python = ">=3.7"
 dependencies = [
+    "numpy>=1.21,<2.0",
     "statsmodels",
-    "sklearn_quantile", 
-    "skranger",
+    "skranger", 
     "pandas",
-    "numpy",
     "scikit-learn",
     "matplotlib",
     "torch",
+    "seaborn",
 ]
 
 [project.optional-dependencies]
