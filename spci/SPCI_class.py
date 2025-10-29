@@ -799,15 +799,15 @@ def test_EnbPI_or_SPCI(main_condition, results_EnbPI_SPCI, itrial=0):
             X_full, Y_full = dloader.get_data(data_name, solar_args, wind_args)
             RF_seed = 1103+itrial
             if data_name == 'solar':
-                fit_func = RandomForestRegressor(n_estimators=10, criterion='mse',
+                fit_func = RandomForestRegressor(n_estimators=10, criterion='squared_error',
                                                  bootstrap=False, n_jobs=-1, random_state=RF_seed)
                 past_window = 200 if use_SPCI else 300
             if data_name == 'electric':
-                fit_func = RandomForestRegressor(n_estimators=10, max_depth=1, criterion='mse',
+                fit_func = RandomForestRegressor(n_estimators=10, max_depth=1, criterion='squared_error',
                                                  bootstrap=False, n_jobs=-1, random_state=RF_seed)
                 past_window = 300
             if data_name == 'wind':
-                fit_func = RandomForestRegressor(n_estimators=10, max_depth=1, criterion='mse',
+                fit_func = RandomForestRegressor(n_estimators=10, max_depth=1, criterion='squared_error',
                                                  bootstrap=False, n_jobs=-1, random_state=RF_seed)
                 past_window = 300
             Y_full, X_full = torch.from_numpy(Y_full).float().to(

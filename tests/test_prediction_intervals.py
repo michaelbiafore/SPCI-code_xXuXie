@@ -22,7 +22,7 @@ class TestPredictionIntervals:
         Y_train, Y_predict = Y_full[:N], Y_full[N:]
 
         fit_func = RandomForestRegressor(
-            n_estimators=10, max_depth=1, criterion='mse',
+            n_estimators=10, max_depth=1, criterion='squared_error',
             bootstrap=False, n_jobs=-1, random_state=1103
         )
         enbpi = SPCI.SPCI_and_EnbPI(X_train, X_predict, Y_train, Y_predict, fit_func=fit_func)

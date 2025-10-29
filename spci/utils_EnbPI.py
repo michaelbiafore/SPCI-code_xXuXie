@@ -1449,7 +1449,7 @@ def all_together(Data_name, sub, no_slide, missing, miss_frac=0.25, one_dim=Fals
             min_alpha = 0.0001
             max_alpha = 10
             ridge_cv = RidgeCV(alphas=np.linspace(min_alpha, max_alpha, 10))
-            random_forest = RandomForestRegressor(n_estimators=10, criterion='mse',
+            random_forest = RandomForestRegressor(n_estimators=10, criterion='squared_error',
                                                   bootstrap=False, max_depth=2, n_jobs=-1)
             ridge_results = EnbPI.prediction_interval(
                 ridge_cv,  X_train, X_predict, Y_train, Y_predict)

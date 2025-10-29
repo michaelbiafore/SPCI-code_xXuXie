@@ -214,7 +214,7 @@ def residual_histogram_pacf_cond_cov():
     N = int(X_full.shape[0] * train_frac)
     X_train, X_predict, Y_train, Y_predict = X_full[:
                                                     N], X_full[N:], Y_full[:N], Y_full[N:]
-    fit_func = RandomForestRegressor(n_estimators=20, criterion='mse',
+    fit_func = RandomForestRegressor(n_estimators=20, criterion='squared_error',
                                      bootstrap=False, max_depth=2, n_jobs=-1)
     EnbPI = SPCI.SPCI_and_EnbPI(
         X_train, X_predict, Y_train, Y_predict, fit_func=fit_func)
