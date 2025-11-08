@@ -95,10 +95,30 @@ def binning(past_resid, alpha):
     return beta_ls[i_star]
 
 
-def binning_use_RF_quantile_regr(quantile_regr, Xtrain, Ytrain, feature, beta_ls, sample_weight=None):
-    # API ref: https://sklearn-quantile.readthedocs.io/en/latest/generated/sklearn_quantile.RandomForestQuantileRegressor.html
+def binning_use_RF_quantile_regr(quantile_regr, Xtrain, Ytrain, feature, beta_ls, sample_weight=None, quantiles=None):
+    # API ref: https://zillow.github.io/quantile-forest/
     feature = feature.reshape(1, -1)
-    low_high_pred = quantile_regr.fit(Xtrain, Ytrain,sample_weight).predict(feature)
+
+    # quantile-forest requires explicit quantiles in predict()
+    # Use the quantiles stored in the regressor's default_quantiles if not provided
+    if quantiles is None and hasattr(quantile_regr, 'default_quantiles'):
+        quantiles = quantile_regr.default_quantiles
+
+    # Fit the quantile regressor
+    quantile_regr.fit(Xtrain, Ytrain, sample_weight=sample_weight)
+
+    # quantile-forest uses quantiles= parameter instead of q=
+    if quantiles is not None and hasattr(quantile_regr, 'default_quantiles'):
+        # This is a quantile-forest regressor
+        # Convert numpy array to list for quantile-forest compatibility
+        quantiles_list = quantiles.tolist() if hasattr(quantiles, 'tolist') else quantiles
+        low_high_pred = quantile_regr.predict(feature, quantiles=quantiles_list)
+        # quantile-forest returns shape (n_samples, n_quantiles), need to flatten
+        low_high_pred = low_high_pred.flatten()
+    else:
+        # Fallback for non-quantile regressors (standard RandomForestRegressor)
+        low_high_pred = quantile_regr.predict(feature)
+
     num_mid = int(len(low_high_pred)/2)
     low_pred, high_pred = low_high_pred[:num_mid], low_high_pred[num_mid:]
     width = (high_pred-low_pred).flatten()
