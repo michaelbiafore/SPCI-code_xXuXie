@@ -78,7 +78,8 @@ class real_data_loader():
     def electric_dataset(self):
         # ELEC2 data set
         # downloaded from https://www.kaggle.com/yashsharan/the-elec2-dataset
-        data = pd.read_csv(f'Data/electricity-normalized.csv')
+        data_path = os.path.join(os.path.dirname(__file__), 'Data', 'electricity-normalized.csv')
+        data = pd.read_csv(data_path)
         col_names = data.columns
         data = data.to_numpy()
 

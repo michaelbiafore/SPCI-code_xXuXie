@@ -1,0 +1,26 @@
+============================= test session starts =============================
+platform win32 -- Python 3.13.1, pytest-8.4.2, pluggy-1.6.0 -- A:\Packages\SPCI\SPCI-code_xXuXie\venv\Scripts\python.exe
+cachedir: .pytest_cache
+rootdir: A:\Packages\SPCI\SPCI-code_xXuXie
+configfile: pyproject.toml
+plugins: anyio-4.11.0
+collecting ... collected 13 items
+
+tests/test_data_loading.py::TestElectricDataset::test_electric_dataset_loads PASSED [  7%]
+tests/test_data_loading.py::TestElectricDataset::test_electric_dataset_shape PASSED [ 15%]
+tests/test_data_loading.py::TestElectricDataset::test_electric_dataset_types PASSED [ 23%]
+tests/test_data_loading.py::TestElectricDataset::test_electric_dataset_no_nans PASSED [ 30%]
+tests/test_enbpi_baseline.py::TestEnbPIBaseline::test_enbpi_initialization PASSED [ 38%]
+tests/test_enbpi_baseline.py::TestEnbPIBaseline::test_enbpi_fit_bootstrap_models PASSED [ 46%]
+tests/test_enbpi_baseline.py::TestEnbPIBaseline::test_enbpi_coverage_and_width PASSED [ 53%]
+tests/test_enbpi_baseline.py::TestEnbPIBaseline::test_enbpi_reproducibility FAILED [ 61%]
+tests/test_prediction_intervals.py::TestPredictionIntervals::test_pi_bounds_are_valid PASSED [ 69%]
+tests/test_prediction_intervals.py::TestPredictionIntervals::test_pi_length_matches_test_data PASSED [ 76%]
+tests/test_prediction_intervals.py::TestPredictionIntervals::test_pi_centers_are_finite PASSED [ 84%]
+tests/test_prediction_intervals.py::TestPredictionIntervals::test_target_coverage_met PASSED [ 92%]
+tests/test_spci_baseline.py::TestSPCIBaseline::test_spci_coverage_and_width FAILED [100%]
+
+=========================== short test summary info ===========================
+FAILED tests/test_enbpi_baseline.py::TestEnbPIBaseline::test_enbpi_reproducibility
+FAILED tests/test_spci_baseline.py::TestSPCIBaseline::test_spci_coverage_and_width
+======================== 2 failed, 11 passed in 26.88s ========================
