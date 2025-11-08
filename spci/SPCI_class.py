@@ -15,16 +15,19 @@ import pdb
 from . import data
 import torch.nn as nn
 
-# Handle sklearn_quantile import conditionally
+# Handle quantile_forest import conditionally
 try:
-    from sklearn_quantile import RandomForestQuantileRegressor, SampleRandomForestQuantileRegressor
-    HAS_SKLEARN_QUANTILE = True
+    from quantile_forest import RandomForestQuantileRegressor
+    HAS_QUANTILE_FOREST = True
+    # quantile-forest doesn't have a separate Sample version
+    # Use the standard version for both cases (performs well on large datasets)
+    SampleRandomForestQuantileRegressor = RandomForestQuantileRegressor
 except ImportError:
-    # Fallback to regular RandomForestRegressor if sklearn_quantile not available
+    # Fallback to regular RandomForestRegressor if quantile_forest not available
     RandomForestQuantileRegressor = RandomForestRegressor
     SampleRandomForestQuantileRegressor = RandomForestRegressor
-    HAS_SKLEARN_QUANTILE = False
-    print("Warning: sklearn_quantile not available, using standard RandomForestRegressor")
+    HAS_QUANTILE_FOREST = False
+    print("Warning: quantile-forest not available, using standard RandomForestRegressor")
 
 from numpy.lib.stride_tricks import sliding_window_view
 # from neuralprophet import NeuralProphet
@@ -76,7 +79,7 @@ class SPCI_and_EnbPI():
         self.c = 0.995 # If self.weight_residuals, weights[s] = self.c ** s, s\geq 0
         self.n_estimators = 10 # Num trees for QRF
         self.max_d = 2 # Max depth for fitting QRF
-        self.criterion = 'mse' # 'mse' or 'mae'
+        self.criterion = 'squared_error' # 'squared_error' or 'absolute_error'
         # search of \beta^* \in [0,\alpha]
         self.bins = 5 # break [0,\alpha] into bins
         # how many LOO training residuals to use for training current QRF 
@@ -305,7 +308,18 @@ class SPCI_and_EnbPI():
                 # "past_resid", which has most entries replaced.
                 rfqr= self.QRF_ls[remainder]
                 i_star = self.i_star_ls[remainder]
-                wid_all = rfqr.predict(resid_pred)
+
+                # quantile-forest requires explicit quantiles parameter
+                if hasattr(rfqr, 'default_quantiles') and rfqr.default_quantiles is not None:
+                    # Convert numpy array to list for quantile-forest compatibility
+                    quantiles_list = rfqr.default_quantiles.tolist() if hasattr(rfqr.default_quantiles, 'tolist') else rfqr.default_quantiles
+                    wid_all = rfqr.predict(resid_pred, quantiles=quantiles_list)
+                    # quantile-forest returns shape (n_samples, n_quantiles), need to flatten
+                    wid_all = wid_all.flatten()
+                else:
+                    # Fallback for non-quantile regressors
+                    wid_all = rfqr.predict(resid_pred)
+
                 num_mid = int(len(wid_all)/2)
                 wid_left = wid_all[i_star]
                 wid_right = wid_all[num_mid+i_star]
@@ -374,18 +388,22 @@ class SPCI_and_EnbPI():
         alpha = self.alpha
         beta_ls = np.linspace(start=0, stop=alpha, num=self.bins)
         full_alphas = np.append(beta_ls, 1 - alpha + beta_ls)
+        # Store quantiles for later use in predict()
+        self.quantiles = full_alphas
+
         self.common_params = dict(n_estimators = self.n_estimators,
                                   max_depth = self.max_d,
                                   criterion = self.criterion,
                                   n_jobs = -1)
         if residX[:-1].shape[0] > 10000:
-            # see API ref. https://sklearn-quantile.readthedocs.io/en/latest/generated/sklearn_quantile.RandomForestQuantileRegressor.html?highlight=RandomForestQuantileRegressor#sklearn_quantile.RandomForestQuantileRegressor
-            # NOTE, should NOT warm start, as it makes result poor
+            # see API ref. https://zillow.github.io/quantile-forest/
+            # quantile-forest doesn't have a separate Sample version
+            # The standard version is efficient for large datasets
             self.rfqr = SampleRandomForestQuantileRegressor(
-                **self.common_params, q=full_alphas)
+                **self.common_params, default_quantiles=full_alphas)
         else:
             self.rfqr = RandomForestQuantileRegressor(
-                **self.common_params, q=full_alphas)
+                **self.common_params, default_quantiles=full_alphas)
         # 3. Find best \hat{\beta} via evaluating many quantiles
         # rfqr.fit(residX[:-1], residY)
         sample_weight = None
@@ -394,10 +412,12 @@ class SPCI_and_EnbPI():
         if self.T1 is not None:
             self.T1 = min(self.T1, len(residY)) # Sanity check to make sure no errors in training
             self.i_star, _, _, _ = utils.binning_use_RF_quantile_regr(
-                self.rfqr, residX[-(self.T1+1):-1], residY[-self.T1:], residX[-1], beta_ls, sample_weight)
+                self.rfqr, residX[-(self.T1+1):-1], residY[-self.T1:], residX[-1], beta_ls, sample_weight,
+                quantiles=self.quantiles)
         else:
             self.i_star, _, _, _ = utils.binning_use_RF_quantile_regr(
-                self.rfqr, residX[:-1], residY, residX[-1], beta_ls, sample_weight)
+                self.rfqr, residX[:-1], residY, residX[-1], beta_ls, sample_weight,
+                quantiles=self.quantiles)
     '''
         All together
     '''
